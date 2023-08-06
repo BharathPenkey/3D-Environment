@@ -10,3 +10,5 @@ function App() {
 }
 
 export default App;
+
+//deployment link -https://64cf6c832be4dd36e0df54e9--exquisite-snickerdoodle-a0c1d0.netlify.app/
