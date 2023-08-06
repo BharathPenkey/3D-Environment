@@ -61,7 +61,8 @@ export function Avatar(props) {
         if(
           currentAudioTime>=mouthCue.start &&
           currentAudioTime<=mouthCue.end
-        ){ console.log(mouthCue.value)
+        ){
+          // console.log(mouthCue.value)
           nodes.Wolf3D_Head.morphTargetInfluences[
             nodes.Wolf3D_Head.morphTargetDictionary[corresponding[mouthCue.value]]
           ]=1;
@@ -72,7 +73,7 @@ export function Avatar(props) {
         }
       }
   })
-  
+
   // setting my animation when it is playing sound 
   useFrame(() => {
     
