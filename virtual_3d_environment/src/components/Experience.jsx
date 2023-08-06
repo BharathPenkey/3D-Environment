@@ -10,7 +10,7 @@ export const Experience = () => {
       <OrbitControls />
       <ambientLight intensity={1}/>
        <Office/>
-       <Avatar/>
+       <Avatar position={[0.3, 0, 0.9]}/>
       
     </>
   );

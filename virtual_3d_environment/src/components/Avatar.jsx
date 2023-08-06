@@ -6,8 +6,26 @@ Command: npx gltfjsx@6.2.10 public/models/64ce2129cbd7d40ae6d6d010.glb -o src/co
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useAnimations, useFBX, useGLTF } from '@react-three/drei'
 import {useControls} from 'leva'
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useLoader } from '@react-three/fiber';
+import * as THREE from 'three'
+
+// for lips sign we add correspondings to lip 
+
+const corresponding = {
+  A: "viseme_PP",
+  B: "viseme_kk",
+  C: "viseme_I",
+  D: "viseme_AA",
+  E: "viseme_O",
+  F: "viseme_U",
+  G: "viseme_FF",
+  H: "viseme_TH",
+  X: "viseme_PP",
+};
+
 export function Avatar(props) {
+
+  const [animation,setAnimation] =useState("Idle") // initial case 
 
   const {playAudio,script} =useControls({
     playAudio:false,
@@ -19,6 +37,43 @@ export function Avatar(props) {
   })
   // for audio to play 
   const audio = useMemo(()=> new Audio(`/audios/${script}.mp3`),[script]);
+  // load for lip sync
+  const jsonFile = useLoader(THREE.FileLoader, `audios/${script}.json`);
+  const lipsync = JSON.parse(jsonFile);
+
+  useFrame(()=>{
+    const currentAudioTime = audio.currentTime;
+   // with the help of morphTarget setting my avatar to speak
+   // replaced avatar glb with new glb which can able to use morphTargets 
+   // glbfileurl?morphTarget=Oculus Visemes // generates new glb which has morphTargets replace with old one 
+   Object.values(corresponding).forEach((value)=>{
+      nodes.Wolf3D_Head.morphTargetInfluences[
+        nodes.Wolf3D_Head.morphTargetDictionary[value]
+      ]=0;
+      nodes.Wolf3D_Teeth.morphTargetInfluences[
+        nodes.Wolf3D_Teeth.morphTargetDictionary[value] 
+      ]=0;
+
+    });
+
+      for(let i=0;i<lipsync.mouthCues.length;i++){
+        const mouthCue=lipsync.mouthCues[i];
+        if(
+          currentAudioTime>=mouthCue.start &&
+          currentAudioTime<=mouthCue.end
+        ){ console.log(mouthCue.value)
+          nodes.Wolf3D_Head.morphTargetInfluences[
+            nodes.Wolf3D_Head.morphTargetDictionary[corresponding[mouthCue.value]]
+          ]=1;
+          nodes.Wolf3D_Teeth.morphTargetInfluences[
+            nodes.Wolf3D_Teeth.morphTargetDictionary[corresponding[mouthCue.value]] 
+          ]=1;
+          break;
+        }
+      }
+  })
+  
+  // setting my animation when it is playing sound 
   useFrame(() => {
     
     if (audio.paused || audio.ended) {
@@ -39,20 +94,21 @@ export function Avatar(props) {
   }, [playAudio])
 
   const { nodes, materials } = useGLTF('/models/64ce2129cbd7d40ae6d6d010.glb')
-  
+  // giving different names with :
   const{animations:idleAnimation} =useFBX("/animations/Breathing Idle.fbx");
   const{animations:greetingAnimation} = useFBX("/animations/Standing Greeting.fbx");
   
   idleAnimation[0].name="Idle";
   greetingAnimation[0].name = "Greeting";
   
-  const [animation,setAnimation] =useState("Idle")
-
+ 
+ // animation for avatar
   const group =useRef()
   const {actions}=useAnimations(
     [idleAnimation[0],greetingAnimation[0]],
   group
   );
+  
 
   useEffect(()=>{
     actions[animation].reset().fadeIn(0.5).play();
