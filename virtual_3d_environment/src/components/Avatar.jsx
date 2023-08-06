@@ -12,6 +12,7 @@ import * as THREE from 'three'
 // for lips sign we add correspondings to lip 
 
 const corresponding = {
+  
   A: "viseme_PP",
   B: "viseme_kk",
   C: "viseme_I",
